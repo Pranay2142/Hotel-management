@@ -2,6 +2,7 @@ package com.example.hotel_management.controller;
 
 import com.example.hotel_management.model.Room;
 import com.example.hotel_management.repository.RoomRepository;
+import com.example.hotel_management.service.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,39 +16,33 @@ import java.util.List;
 @RequestMapping("/rooms")
 
 public class RoomController {
-    //Injects the dependency of RoomRepository automatically at runtime using Spring's Dependency Injection (DI).
-//@Autowired
-//private RoomRepository roomRepository;
 
-    //Preferred: Constructor Injection,  Promotes immutability
-    private final RoomRepository roomRepository;
+    private final RoomService roomService;
 
-    public RoomController(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
+    public RoomController(RoomService roomService){
+        this.roomService = roomService;
     }
 
 
-    //Handles HTTP GET requests to /rooms.
     @GetMapping
     public List<Room> getAllRooms(){
-        return roomRepository.findAll();
+        return roomService.getAllRooms();
     }
 
-    // Handles HTTP POST requests to /rooms.
-    /*@PostMapping
-    //@RequestBody tells Spring to deserialize the incoming JSON payload into a Java object
-    public Room createRoom(@RequestBody Room room){ //
-        return roomRepository.save(room);
-    }*/
+    @GetMapping("/{id}")
+    public Room getRoomById(@PathVariable Long id){
+        return roomService.getRoomById(id);
+    }
+
 
     @PostMapping
-    public ResponseEntity<?> createRoom(@Valid @RequestBody Room room, BindingResult result) {
-        //BindingResult is an interface that holds the result of a validation and binding operation for a request.
-        //BindingResult must come immediately after the @Valid annotated parameter.
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
-        return ResponseEntity.ok(roomRepository.save(room));
+    public Room createRoom(@RequestBody Room room){
+        return roomService.createRoom(room);
+    }
+
+    @PutMapping("/{id}")
+    public Room updatedRoom(@PathVariable Long id, @RequestBody Room room){
+        return roomService.updateRoom(id,room);
     }
 
 }
