@@ -1,11 +1,13 @@
 package com.example.hotel_management.service;
 
+import com.example.hotel_management.exception.RoomNotFoundException;
 import com.example.hotel_management.model.Room;
 import com.example.hotel_management.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomServiceImpl implements RoomService{
@@ -19,9 +21,8 @@ public class RoomServiceImpl implements RoomService{
     }
 
     @Override
-    public Room getRoomById(Long id) {
-       return roomRepository.findById(id).orElseThrow(()-> new RuntimeException("Room not found with id : "+ id));
-
+    public Optional<Room> getRoomById(Long id) {
+       return roomRepository.findById(id);
     }
 
     @Override
@@ -30,16 +31,21 @@ public class RoomServiceImpl implements RoomService{
     }
 
     @Override
-    public Room updateRoom(Long id, Room updatedRoom) {
-        Room existingRoom = getRoomById(id);
+    public Room updateRoom(Long id, Room updatedRoom) throws RoomNotFoundException {
+        Room existingRoom = roomRepository.findById(id).orElseThrow(() -> new RoomNotFoundException("Room not found with id: " + id));
         existingRoom.setRoomNumber(updatedRoom.getRoomNumber());
         existingRoom.setType(updatedRoom.getType());
         existingRoom.setAvailable(updatedRoom.isAvailable());
+
         return roomRepository.save(existingRoom);
     }
 
     @Override
     public void deleteRoom(Long id) {
+        if(!roomRepository.existsById(id)){
+            throw new RoomNotFoundException("Room not found with id: "+ id);
+        }
         roomRepository.deleteById(id);
+
     }
 }
